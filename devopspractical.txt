@@ -1,0 +1,13 @@
+https://devopsarticle.com/how-to-install-and-configure-ansible-on-ubuntu-20-04-2021-devops-article/
+
+https://eksctl.io/usage/kms-encryption/
+
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kms-key.html
+
+https://www.tigera.io/blog/kubernetes-issues-and-solutions/   ---------issues & Solution in K8S
+
+
+https://cloudkatha.com/how-to-create-iam-role-using-cloudformation/
+
+
+https://cloudcustodian.io/docs/aws/resources/aws-common-filters.html#aws-common-filters-iam-analyzer

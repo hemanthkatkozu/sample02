@@ -1,0 +1,111 @@
+###########################################CLOUD FORMATION TEMPLATE#####################################################
+{
+  "AwsTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Sample template",
+
+  "Parameters" : {
+      "ImageIdParm" : { "Type" : "String" },
+      "InstanceTypeParm" : {
+          "Type" : "String",
+          "Default" : "t2.micro",
+          "AllowedValues" : [ "t2.micro" , "t2.small" , "t2.large" ],
+      },
+      "SubnetIdParm" : { "Type" : "String" },
+      "KeyNameParm" : { "Type" : "String" },
+  },
+
+  "Resources" : {
+    "AwsFoundationEc2Instance" : {
+        "Type" : "Aws::EC2::Instance",
+        "Properties" : {
+            "ImageId" : { "Ref" : "ImageIdParm" },
+            "InstanceType" : { "Ref" : "InstanceTypeParm" },
+            "SubnetId" : { "Ref" : "SubnetIdParm" },
+            "Tags" : [
+                 { "Key" : "Name", "Value" : "SampleTemplateInstance" },  
+            ],
+            "SecurityGroupIds" : ["sg-*******"],
+            "Keyname" : { "Ref" : "KeyNameParm" },
+        }
+     }
+  }
+}
+
+#######################################################################################################################
+ ---
+    |
+ ---
+|
+ ----
+
+{
+  "AwsTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Sample template",
+
+  "Parameters" : {
+      "ImageIdParm" : { "Type" : "String" },
+      "InstanceTypeParm" : {
+          "Type" : "String",
+          "Default" : "t2.micro",
+          "AllowedValues" : [ "t2.micro" , "t2.small" , "t2.large" ],
+      },
+      
+      "KeyNameParm" : { "Type" : "String" },
+      "VpcCidrParm" : {
+          "Type" : "String",
+          "Description" : "Enter vpc CIDR Block",
+      },
+      
+      "PublicSubnetCidrParm" : {
+          "Type" : "String",
+          "Description" : "Enter PublicSubnet CIDR Block",
+      },
+      
+      "PrivateSubnetCidrParm" : {
+          "Type" : "String",
+          "Description" : "Enter PrivateSubnet CIDR Block",
+      },
+     
+  },
+  
+  "Mappings" : {
+      "RegionMap" : {
+          "us-east-1"           : { "32" : "ami-123456", "64" : "ami-123456" },
+          "us-west-1"           : { "32" : "ami-123456", "64" : "ami-123456" }, 
+          "ap-south-1"          : { "32" : "ami-123456", "64" : "ami-123456" },
+          "ap-southeast-1"      : { "32" : "ami-123456", "64" : "ami-123456" },
+
+  "Resources" : {
+    "AwsFoundationEc2Instance" : {
+        "Type" : "Aws::EC2::Instance",
+        "Properties" : {
+            "ImageId" : { "Ref" : "ImageIdParm" },
+            "InstanceType" : { "Ref" : "InstanceTypeParm" },
+            "SubnetId" : { "Ref" : "SubnetIdParm" },
+            "Tags" : [
+                 { "Key" : "Name", "Value" : "SampleTemplateInstance" },  
+            ],
+            "SecurityGroupIds" : ["sg-*******"],
+            "Keyname" : { "Ref" : "KeyNameParm" },
+        }
+     }
+    "AwsFoundationVpc" : {
+        "Type" : "Aws::EC2::VPC",
+        "Properties" : {
+            "CidrBlock" : { "Ref" , "VpcCidrParm" },
+        "Tags" : [{ "Key" : "Name", "Value" : "SampleTemplateForVPC" }],
+  }
+  "AwsFoundationInternetGtw" : {
+        "Type" : "Aws::EC2::InternetGateway",
+        "Properties" : {
+            "CidrBlock" : { "Ref" , "VpcCidrParm" },
+        "Tags" : [{ "Key" : "Name", "Value" : "SampleTemplateForInternetGTW" }],
+  }
+  "AwsFoundationVpcIgtwAttachment" : {
+        "Type" : "Aws::EC2::VPCGatewayAttachment",
+        "DependsOn" : [ "AwsFoundationVpc",  "AwsFoundationInternetGtw" ],
+        "Properties" : {
+            "CidrBlock" : { "Ref" , "VpcCidrParm" },
+        "Tags" : [{ "Key" : "Name", "Value" : "SampleTemplateForVPC" }],
+  }
+}

@@ -1,0 +1,51 @@
+----------------------- GRAFAN FROM CLOUDWATCH METRICS ------------------------------------------------------
+GRAFANA INSTALLATION & ATTACHING IAM POLICY TO SEND METRICS DATA TO GRAFANA FROM CLOUDWATCH METRICS
+
+1. Install Grafana :  https://www.techgeeknext.com/tools/docker/install-grafana-using-docker 
+2. Go to AWS -> IAM -> Policies.
+3. Add below JSON in policy -> Create Policy
+
+{
+   "Version": "2022-10-23", -- current Date
+   "Statement": [
+       {
+           "Sid": "AllowReadingMetricsFromCloudWatch",
+           "Effect": "Allow",
+           "Action": [
+               "cloudwatch:ListMetrics",
+               "cloudwatch:GetMetricStatistics",
+               "cloudwatch:GetMetricData"
+           ],
+           "Resource": "*"
+       },
+       {
+           "Sid": "AllowReadingTagsInstancesRegionsFromEC2",
+           "Effect": "Allow",
+           "Action": [
+               "ec2:DescribeTags",
+               "ec2:DescribeInstances",
+               "ec2:DescribeRegions"
+           ],
+           "Resource": "*"
+       }
+   ]
+}
+
+
+4. IAM -> Roles -> Create Role -> Select AWS Service / EC2
+5. Attach Permission policies
+6. IAM -> Users and click Add User ->Attach existing policies -> copy Access Key ID, your Secret Key
+7. EC2 -> Instances-> Select Grafana Server and click on Actions -> Instance Settings -> Attach/Replace IAM Role -> Attach your Grafana IAM Role to the instance.
+8. Log in to your Grafana Server using Terminal as root user and provide Access Key ID, your Secret Key
+
+
+# vim /usr/share/grafana/.credentials
+
+aws_access_key_id = 000000000000
+aws_secret_access_key = 0000000000
+region = us-west-2
+
+# chmod 0644 .credentials
+
+9. Grafana -> Navigate to Data Sources -> Select CloudWatch Type
+Create Dashboard -> Select Graph -> Select Panel Title -> edit and provide namespace.

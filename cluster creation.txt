@@ -1,0 +1,7 @@
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+eksctl create cluster --name cluster-name  \
+--region region-name \
+--node-type instance-type \
+--nodes-min 2 \
+--nodes-max 2 \ 
+--zones ,

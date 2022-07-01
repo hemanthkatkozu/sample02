@@ -1,0 +1,36 @@
+docker pull image_name
+
+docker images
+
+docker image ls
+
+docker run --name cont_name -p -d image_name
+
+docker container ls
+
+docker ps
+
+docker ps -a
+
+docker start/stop/restart cont_id
+
+docker rm cont_id
+
+docker rm $(docker ps -aq)
+
+docker rm -f $(docker ps -aq)
+
+docker rmi $(docker images)
+
+docker rmi -f $(docker images)
+
+docker logs cont-id
+
+docker port cont-id
+
+docker exec -it cont-id bin/bash
+
+docker inspect
+
+
+ 

@@ -1,0 +1,233 @@
+{
+    "AwsTemplateFormatVersion" : "2010-09-09",
+    "Description" : "Sample template",
+  
+    "Parameters" : {
+        "ImageIdParm" : { "Type" : "String" },
+        "InstanceTypeParm" : {
+            "Type" : "String",
+            "Default" : "t2.micro",
+            "AllowedValues" : [ "t2.micro" , "t2.small" , "t2.large" ]
+        },
+        
+        "KeyNameParm" : { "Type" : "String" },
+        "VpcCidrParm" : {
+            "Type" : "String",
+            "Description" : "Enter vpc CIDR Block"
+        },
+        
+        "PublicSubnetCidrParm" : {
+            "Type" : "String",
+            "Description" : "Enter PublicSubnet CIDR Block"
+        },
+        
+        "PrivateSubnetCidrParm" : {
+            "Type" : "String",
+            "Description" : "Enter PrivateSubnet CIDR Block"
+        }
+       
+    },
+    
+    "Mappings" : {
+        "RegionMap" : {
+            "us-east-1"           : { "64" : "ami-09d56f8956ab235b3" },
+            "us-west-1"           : { "64" : "ami-09d56f8956ab235b3" }, 
+            "ap-south-1"          : { "64" : "ami-09d56f8956ab235b3" },
+            "ap-southeast-1"      : { "64" : "ami-09d56f8956ab235b3" }
+        }
+    },
+
+    "Resources" : {
+        "AwsVpc" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock" : { "Ref" : "VpcCidrParm" },
+                "Tags" : [{ "Key" : "Name", "Value" : "aws-foundation-cft-vpc" }]
+            }
+        },
+
+        "InternetGtw" : {
+            "Type" : "AWS::EC2::InternetGateWay",
+            "properties" : {
+                "Tags" : [{ "Key" : "Name", "Value" : "Internet-Gate-Way" }]
+            },
+            "DependsOn" : "AwsVpc" 
+        },
+
+        "AwsVpcInternetGtwAttachment" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn" : [ "AwsVpc", "InternetGtw" ],
+            "Properties" : { 
+                "InternetGatewayId" : { "Ref" : "InternetGtw" },
+                "VpcId" : { "Ref" : "AwsVpc" } 
+            }
+        },
+
+        "AwsPublicSubnet" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Select" : [ "0", { "Fn::GetAZs" : { "Ref" : "Aws::Region" } } ] },
+                "CidrBlock" : { "Ref" : "PublicSubnetCidrParm" },
+                "MapPublicIpOnLaunch" : "True",
+                "Tags" : [ { "Key" : "Name", "Value" : "Public-Subnet" } ],
+                "VpcId" : { "Ref" : "AwsVpc" }
+            }
+        },
+
+        "AwsPrivateSubnet" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Select" : [ "1", { "Fn::GetAZs" : { "Ref" : "Aws::Region" } } ] },
+                "CidrBlock" : { "Ref" : "PrivateSubnetCidrParm" },
+                "MapPublicIpOnLaunch" : "True",
+                "Tags" : [ { "Key" : "Name", "Value" : "Private-Subnet" } ],
+                "VpcId" : { "Ref" : "AwsVpc" }
+            }
+        },
+
+        "NatGtwEip" : {
+            "Type" : "AWS::EC2::EIP",
+            "DependsOn" : "AwsVpcInternetGtwAttachment",
+            "Properties" : {
+                "Domain" : "vpc"
+            }
+        },
+
+        "NatGtw" : {
+            "Type" : "AWS::EC2::NatGateway",
+            "Properties" : {
+                "AllocationId" : { "Fn::GetAtt" : [ "NatGtwEip", "AllocationId" ]},
+                "SubnetId" : { "Ref" : "AwsPublicSubnet" },
+                "Tags" : [ { "Key" : "Name", "Value" : "AwsNatGateWay"} ]
+            }
+        },
+        
+        "AwsPublicRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "DependsOn" : "AwsPublicSubnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "AwsVpc"},
+                "Tags" : [ { "Key" : "Name", "Value" : "AwsPublicRouter"} ]
+            }
+        },
+
+        "AwsPublicRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "AwsPublicRouteTable",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "InternetGtw"},
+                "RouteTableId" : { "Ref" : "AwsPublicRouteTable"}
+            }
+        },
+
+        "AwsPrivateRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "DependsOn" : "AwsPrivateSubnet",
+            "Properties" : {
+                "VpcId" : { "Ref" : "AwsVpc"},
+                "Tags" : [ { "Key" : "Name", "Value" : "AwsPrivateRouter"} ]
+            }
+        },
+
+        "AwsPrivateRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "AwsPrivateRouteTable",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "NatGatewayId" : { "Ref" : "NatGtw"},
+                "RouteTableId" : { "Ref" : "AwsPrivateRouteTable"}
+            }
+        },
+
+        "AwsPublicSubnetRt" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "AwsPublicRouteTable"},
+                "SubnetId" : { "Ref" : "AwsPublicsubnet" }
+            }
+        },
+
+        "AwsPrivateSubnetRt" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "RouteTableId" : { "Ref" : "AwsPriavteRouteTable"},
+                "SubnetId" : { "Ref" : "AwsPrivatesubnet" }
+            }
+        },
+
+        "AwsPublicSubnetSecurityGrp" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "DependsOn" : "AwsVpc",
+            "properties" : {
+                "GroupName" : "SGrpForPublicSubnet",
+                "GroupDescription" : "SGrpForPublicSubnet",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "22",
+                        "ToPort" : "22",
+                        "CidrIp" : "0.0.0.0/0"
+                    }
+                ],
+                "SecurityGroupEgress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "22",
+                        "ToPort" : "22",
+                        "CidrIp" : { "Ref" : "PrivateSubnetCidrParm" }
+                    }
+                ],
+                "Tags" : [ { "Key" : "Name", "Value" : "PublicSubnetSgrp"}],
+                "VpcId" : { "Ref" : "AwsVpc" }
+            }  
+        },
+
+        "AwsPrivateSubnetSecurityGrp" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "DependsOn" : "AwsVpc",
+            "properties" : {
+                "GroupName" : "SGrpForPrivateSubnet",
+                "GroupDescription" : "SGrpForPrivateSubnet",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort" : "22",
+                        "ToPort" : "22",
+                        "CidrIp" : { "Ref" : "PublicSubnetCidrParm" }
+                    }
+                ],
+                "Tags" : [ { "Key" : "Name", "Value" : "PrivateSubnetSgrp" } ],
+                "VpcId" : { "Ref" : "AwsVpc" }
+            }  
+        },
+
+        "AwsPubEc2Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "DependsOn" : "AwsPublicSubnetRt",
+            "Properties" : {
+                "ImageId" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "Aws:Region" }, "64" ] },
+                "InstanceType" : { "Ref" : "instanceTypeParm" },
+                "SubnetId" : { "Ref" : "AwsPublicSubnet" },
+                "Tags" : [ { "Key" : "Name", "Value" : "Public-Instance" } ],
+                "SecurityGroupIds" : [ { "Ref" : "AwsPublicSubnetSecurityGrp"} ],
+                "KeyName" : { "Ref" : "KeyNameParm" }
+
+            } 
+        },
+
+        "AwsPrivateEc2Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "DependsOn" : "AwsPrivateSubnetRt",
+            "Properties" : {
+                "ImageId" : { "Fn::FindInMap" : [ "RegionMap", { "Ref" : "Aws:Region" }, "64" ] },
+                "InstanceType" : { "Ref" : "instanceTypeParm" },
+                "SubnetId" : { "Ref" : "AwsPrivateSubnet" },
+                "Tags" : [ { "Key" : "Name", "Value" : "Private-Instance" } ],
+                "SecurityGroupIds" : [ { "Ref" : "AwsPrivateSubnetSecurityGrp"} ],
+                "KeyName" : { "Ref" : "KeyNameParm" }
+            } 
+        }
+
+    }
+}

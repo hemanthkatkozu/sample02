@@ -1,0 +1,37 @@
+#########################Steps to launch Vpc&subnets using Cloud formation template################################
+
+1.awstemplateformatversion
+  description
+
+
+2. parameters: 
+  - imageidparm
+  - instancetypeparm
+  - keynameparm
+  - vpcCidrparm
+  - publicsubnetcidrparm
+  - privatesubnetcidrparm
+
+3. Mappings:
+  RegionMap
+   us-east-1
+   us-west-1........
+
+4. Resources:
+  -  vpc
+  -  internetgtw
+  -  vpcInternetgatewayAttachment
+  -  publicsubnet
+  -  privatesubnet
+  -  NatgatewayElasticip
+  -  NatGateway
+  -  publicroutetable
+  -  publicroute
+  -  privateroutetable
+  -  privateroute
+  -  publicsubnetRoute
+  -  privatesubnetRoute
+  -  publicsubnetsecuritygroup
+  -  privatesubnetsecuritygroup
+  -  publicsubnetInstance
+  -  privatesubnetInstance

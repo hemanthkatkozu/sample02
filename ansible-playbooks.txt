@@ -1,0 +1,33 @@
+############################# ansible playbook1 ##########################
+---
+- name: install git java
+  hosts: all
+  tasks:
+   - name: installing git
+     apt:
+       name: git
+       state: present
+       update_cache: yes
+   - name: Installing java
+     apt:
+       name: openjdk-11-jdk
+       state: present
+       update_cache: yes
+   - name: installing python python-pip
+     apt:
+       name: python-pip
+       state: present
+       update_cache: yes
+...
+
+
+######################### ansible playbook2 #############################
+
+
+- name: install python-pip
+  hosts: ubuntu@172.31.46.40
+  tasks:
+   
+
+...
+

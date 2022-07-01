@@ -1,0 +1,28 @@
+apt install openjdk-14-jre-headless
+
+wget https://dlcdn.apache.org/nifi/1.14.0/nifi-1.16.0-bin.tar.gz
+
+sudo iptables -A INPUT -p tcp --dport 8443 -j ACCEPT
+
+tar -xvzf nifi-1.16.0-bin.tar.gz
+
+cd nifi-1.16.0
+
+vi conf/nifi.properties
+# webproperties
+- nifi.web.https.host=publicip of isntance
+
+
+bin/nifi.sh start
+
+cat logs/nifi-app.log
+#copy user name & password & url
+
+bin/nifi.sh stop
+bin/nifi.sh set-single-user-credentials Hemanth "Hemanth@123"
+bin/nifi.sh start
+
+
+  
+./ngrok http 3000 -host-header="3.110.196.36:9443"
+ 

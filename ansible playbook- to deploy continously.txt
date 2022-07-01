@@ -1,0 +1,31 @@
+---
+- hosts: docker-host
+  tasks:
+    - name: stop the container
+      command: docker stop regapp-server
+      ignore_errors: yes
+
+    - name: remove the container
+      command: docker rm regapp-server
+      ignore_errors: yes
+
+    - name: remove image
+      command: docker rmi hemanth1211/regapp:latest
+      ignore_errors: yes
+
+    - name: create a container
+      command: docker run --name regapp-server -d -p 8082:8080 hemanth1211/regapp:latest
+
+
+
+sleep 10; ---------- waits 10 seconds to execute another 
+
+
+
+
+----------------------------------------------------------------------------------------------------
+
+---
+- name: installing apache2 git maven openjdk-11-jdk
+  hosts: all
+  become: yes
